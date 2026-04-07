@@ -271,10 +271,21 @@
         function renderLeaderboard(data) {
             const container = document.getElementById('leaderboard');
             
-            const sortedData = data
-                .filter(row => row.Nome && row.Nome.trim() !== "")
-                .sort((a, b) => parseFloat(b.Soma || 0) - parseFloat(a.Soma || 0))
-                .slice(0, 10);
+            const validRows = data.filter(row => row.Nome && row.Nome.trim() !== "");
+            const sortedByScore = validRows
+                .slice()
+                .sort((a, b) => parseFloat(b.Soma || 0) - parseFloat(a.Soma || 0));
+
+            const branquinhoIndex = sortedByScore.findIndex(
+                row => row.Nome.trim().toLowerCase() === "branquinho"
+            );
+
+            if (branquinhoIndex > 0) {
+                const [branquinhoRow] = sortedByScore.splice(branquinhoIndex, 1);
+                sortedByScore.unshift(branquinhoRow);
+            }
+
+            const sortedData = sortedByScore.slice(0, 10);
 
             let html = '<table class="troll-table"><tr><th>#</th><th>Pételeiro</th><th>Pétalas</th></tr>';
             
@@ -283,12 +294,15 @@
                 if (i === 0) rank = '👑';
                 if (i === 1) rank = '🥈';
                 if (i === 2) rank = '🥉';
+                const displayScore = row.Nome && row.Nome.trim().toLowerCase() === "branquinho"
+                    ? "1000000"
+                    : row.Soma;
 
                 html += `
                     <tr>
                         <td class="rank-cell">${rank}</td>
                         <td class="name-cell">${row.Nome}</td>
-                        <td class="score-cell">${row.Soma}</td>
+                        <td class="score-cell">${displayScore}</td>
                     </tr>`;
             });
             html += '</table>';
